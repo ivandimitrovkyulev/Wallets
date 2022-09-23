@@ -1,0 +1,5 @@
+var="$(cat wallets.json)"
+docker run --shm-size="2g" -it <image-id> python3 main.py <mode> "$var"
+docker run --shm-size="2g" -it <image-id> python3 -m src.individual.scrape <address> <name>
+python3 run_containers.py wallets.json
+docker kill $(docker ps -q)
