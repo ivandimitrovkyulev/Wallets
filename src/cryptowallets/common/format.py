@@ -5,12 +5,12 @@ from datetime import (
     datetime,
     timedelta,
 )
-from src.common.logger import (
+from src.cryptowallets.common.logger import (
     log_spam,
     log_error,
     log_fail,
 )
-from src.common.variables import (
+from src.cryptowallets.common.variables import (
     time_format,
     ignore_list,
     ignore_list_type,
@@ -53,7 +53,7 @@ def format_data(
     data = []
     t_flag = ''
 
-    # If txn does not have the right structure log and return none---
+    # If txn does not have the right structure log and return none
     if not isinstance(txn, list):
         log_error.critical(f"{txn} is not a list.")
         return

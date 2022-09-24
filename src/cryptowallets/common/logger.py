@@ -1,6 +1,6 @@
 import logging
 
-from src.common.variables import log_format
+from src.cryptowallets.common.variables import log_format
 
 
 def logger_setup(
@@ -31,6 +31,6 @@ def logger_setup(
 
 
 # Configure logging settings
-log_error = logger_setup("error", "scripts/logs/error.log")
-log_spam = logger_setup("spam", "scripts/logs/spam.log")
-log_fail = logger_setup("fail", "scripts/logs/fail.log")
+log_spam = logger_setup("spam", "logs/spam.log")
+log_error = logger_setup("error", "logs/error.log")
+log_fail = logger_setup("fail", "logs/fail.log")

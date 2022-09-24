@@ -1,0 +1,9 @@
+## For screening
+var="$(cat wallets.json)"
+docker run --name="wallets" "eu.gcr.io/hip-orbit-347017/wallets" python3 main.py "$var"
+
+## To run docker container checker
+# docker cp wallets:/wallets/.env . | chmod go-rw .env
+# nohup python3 container_check.py wallets &
+
+# docker cp wallets:/wallets/logs/error.log .

@@ -9,7 +9,7 @@ from selenium.common.exceptions import (
     TimeoutException
 )
 
-from src.common.logger import log_error
+from src.cryptowallets.common.logger import log_error
 
 
 def wait_history_table(
