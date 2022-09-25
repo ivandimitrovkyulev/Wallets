@@ -31,6 +31,7 @@ def logger_setup(
 
 
 # Configure logging settings
-log_spam = logger_setup("spam", "logs/spam.log")
 log_error = logger_setup("error", "logs/error.log")
 log_fail = logger_setup("fail", "logs/fail.log")
+log_spam = logger_setup("spam", "logs/spam.log")
+log_txns = logger_setup("txns", "logs/txns.log")
