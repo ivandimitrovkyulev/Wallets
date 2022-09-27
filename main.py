@@ -15,6 +15,9 @@ from src.cryptowallets.debank import (
 )
 from src.cryptowallets.compare import (
     compare_lists,
+    alert_txns,
+    format_txn_message,
+    check_txn,
 )
 from src.cryptowallets.common.exceptions import exit_handler
 from src.cryptowallets.common.helpers import print_start_message
@@ -26,30 +29,30 @@ if len(sys.argv) != 2:
 
 # Send telegram debug message if program terminates
 program_name = os.path.abspath(os.path.basename(__file__))
-#register(exit_handler, program_name)
+register(exit_handler, program_name)
 
 # Fetch variables
 info: dict = json.loads(sys.argv[-1])
-sleep_time = info["settings"]['sleep_time']
+loop_sleep, request_sleep = info["settings"].values()
 
 timestamp = datetime.now().astimezone().strftime(time_format)
 print_start_message(info, timestamp)
 
 
 wallets = [Wallet(address, info['wallets'][address]['name']) for address in info['wallets']]
-args = [[wallet] for wallet in wallets]
+args = [[wallet, 20, request_sleep] for wallet in wallets]
 
 data = list(asyncio.run(gather_funcs(get_last_txns, args)))
-old_txns = [[item['history_list'], item['token_dict']] for item in data]
+old_txns = [[item['history_list'], item['token_dict']] for item in data if item]
 
 loop_counter = 1
 while True:
     # Wait for new transaction to appear
     start = time.perf_counter()
-    time.sleep(sleep_time)
+    time.sleep(loop_sleep)
 
     data = list(asyncio.run(gather_funcs(get_last_txns, args)))
-    new_txns = [[item['history_list'], item['token_dict']] for item in data]
+    new_txns = [[item['history_list'], item['token_dict']] for item in data if item ]
 
     # Iterate through all wallets
     for i, txns in enumerate(zip(new_txns, old_txns)):
@@ -68,10 +71,11 @@ while True:
         found_txns = compare_lists(new_history_list, old_history_list)
 
         if found_txns:
-            pass  # history_list, wallet, tokens_dicts
+            for found_txn in found_txns:
+                pass
 
-        # Save latest txn data in old_txns
-        old_txns[i] = deepcopy(new_txns[i])
+            # Save latest txn data in old_txns only if there is a new txn
+            old_txns[i] = deepcopy(new_txns[i])
 
     timestamp = datetime.now().astimezone().strftime(time_format)
     print(f"{timestamp} - Loop {loop_counter} executed in {(time.perf_counter() - start):,.2f} secs.")

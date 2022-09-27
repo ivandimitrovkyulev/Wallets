@@ -13,9 +13,7 @@ def print_start_message(info: dict, timestamp: str) -> None:
 
     print(f"{timestamp} - Started screening the following wallet addresses:")
 
-    wallets = [wallet for wallet in info['wallets']]
-
-    message = [['-', '-', '-']]
+    message = []
     for address, details in info['wallets'].items():
 
         wallet_name = details['name']
@@ -26,8 +24,10 @@ def print_start_message(info: dict, timestamp: str) -> None:
         if not chat_id:
             chat_id = CHAT_ID_ALERTS
 
-        message.append([address, wallet_name, chat_id])
+        message.append([wallet_name, address, chat_id])
 
-    columns = ["Wallet\nName", "Wallet\nAddress", "Chat_ID", ]
+    columns = ["Wallet Name", "Wallet Address", "Chat ID", ]
 
-    print(tabulate(message, showindex=True, tablefmt="fancy_grid", headers=columns))
+    row_ids = [i for i in range(1, len(message) + 1)]
+
+    print(tabulate(message, showindex=row_ids, tablefmt="fancy_grid", headers=columns))
