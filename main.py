@@ -2,23 +2,14 @@ import os
 import sys
 import json
 import time
-import asyncio
 
 from atexit import register
 from datetime import datetime
 from copy import deepcopy
 
 from src.cryptowallets.datatypes import Wallet
-from src.cryptowallets.debank import (
-    get_last_txns,
-    gather_funcs,
-)
-from src.cryptowallets.compare import (
-    compare_lists,
-    alert_txns,
-    format_txn_message,
-    check_txn,
-)
+from src.cryptowallets.debank import get_last_txns
+from src.cryptowallets.compare import compare_lists
 from src.cryptowallets.common.exceptions import exit_handler
 from src.cryptowallets.common.helpers import print_start_message
 from src.cryptowallets.common.variables import time_format
@@ -40,9 +31,8 @@ print_start_message(info, timestamp)
 
 
 wallets = [Wallet(address, info['wallets'][address]['name']) for address in info['wallets']]
-args = [[wallet, 20, request_sleep] for wallet in wallets]
 
-data = list(asyncio.run(gather_funcs(get_last_txns, args)))
+data = [get_last_txns(wallet) for wallet in wallets]
 old_txns = [[item['history_list'], item['token_dict']] for item in data if item]
 
 loop_counter = 1
@@ -51,8 +41,8 @@ while True:
     start = time.perf_counter()
     time.sleep(loop_sleep)
 
-    data = list(asyncio.run(gather_funcs(get_last_txns, args)))
-    new_txns = [[item['history_list'], item['token_dict']] for item in data if item ]
+    data = [get_last_txns(wallet) for wallet in wallets]
+    new_txns = [[item['history_list'], item['token_dict']] for item in data if item]
 
     # Iterate through all wallets
     for i, txns in enumerate(zip(new_txns, old_txns)):

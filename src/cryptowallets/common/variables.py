@@ -4,7 +4,7 @@ Set up program variables.
 import os
 from dotenv import load_dotenv
 
-from aiohttp import ClientTimeout
+from pymemcache.client.base import PooledClient
 
 
 load_dotenv()
@@ -13,9 +13,10 @@ TOKEN = os.getenv("TOKEN")
 CHAT_ID_ALERTS = os.getenv("CHAT_ID_ALERTS")
 CHAT_ID_ALERTS_ALL = os.getenv("CHAT_ID_ALERTS_ALL")
 CHAT_ID_DEBUG = os.getenv("CHAT_ID_DEBUG")
+TOR_PASSWORD = os.getenv("TOR_PASSWORD")
 
-# Configure aiohttp timeout
-timeout_class = ClientTimeout(total=3)
+# Set-up memcached client instance
+memcache = PooledClient(('localhost', 11211), connect_timeout=3, timeout=3)
 
 time_format = "%Y-%m-%d %H:%M:%S, %Z"
 log_format = "%(asctime)s - %(levelname)s - %(message)s"

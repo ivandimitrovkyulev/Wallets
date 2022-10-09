@@ -1,5 +1,5 @@
 ## For screening
-docker run --name="wallets" eu.gcr.io/hip-orbit-347017/wallets" python3 main.py "$(cat wallets.json)"
+docker run --name="wallets" "eu.gcr.io/hip-orbit-347017/wallets" /bin/bash -c "service tor start && python3 main.py '$(cat wallets.json)'"
 
 ## To run docker container_checker
 # docker cp wallets:/wallets/.env . | chmod go-rw .env

@@ -9,6 +9,9 @@ ENV PYTHONFAULTHANDLER=1 \
     PIP_DEFAULT_TIMEOUT=100 \
     POETRY_VERSION=1.1.13
 
+# Install tor
+RUN apt-get tor
+
 # System dependencies 
 RUN pip install "poetry==$POETRY_VERSION"
 

@@ -13,6 +13,9 @@ tabulate = "^0.8.10"
 stem = "^1.8.0"
 PySocks = "^1.7.1"
 fake-useragent = "^0.1.11"
+aiohttp-socks = "^0.7.1"
+pymemcache = "^3.5.2"
+beautifulsoup4 = "^4.11.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
