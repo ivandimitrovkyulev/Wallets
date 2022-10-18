@@ -39,7 +39,6 @@ def telegram_send_message(
     :param sleep_time: Time to sleep if Telegram bot clutters
     :return: requests.Response
     """
-    return
     telegram_token = str(telegram_token)
     telegram_chat_id = str(telegram_chat_id)
     message_text = str(message_text)
