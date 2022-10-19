@@ -41,7 +41,7 @@ def get_debank_resp(wallet: Wallet, txn_count: int = 20,
         return resp
 
     except Exception as e:
-        log_error.warning(f"'get_debank_resp' - {Wallet.name} - {e}")
+        log_error.warning(f"'get_debank_resp' - {Wallet} - {e}")
         return None
 
 
@@ -76,7 +76,7 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
     """
 
     data = [get_last_txns(wallet) for wallet in wallets_list]
-    old_txns = [[item['history_list'], item['token_dict']] for item in data if item]
+    old_txns = [[item['history_list'], item['token_dict']] if item else None for item in data]
 
     loop_counter = 1
     while True:
@@ -85,7 +85,7 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
         time.sleep(sleep_time)
 
         data = [get_last_txns(wallet) for wallet in wallets_list]
-        new_txns = [[item['history_list'], item['token_dict']] for item in data if item]
+        new_txns = [[item['history_list'], item['token_dict']] if item else None for item in data]
 
         # Iterate through all wallets
         for i, txns in enumerate(zip(new_txns, old_txns)):

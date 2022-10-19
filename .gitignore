@@ -137,4 +137,5 @@ dmypy.json
 *.log
 wallets.json
 
-
+# Ignore tor config file
+torrc

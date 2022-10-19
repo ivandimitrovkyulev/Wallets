@@ -1,14 +1,13 @@
 <h1>CryptoWallets</h1>
-<h3>version 1.0.0</h3>
+<h3>version 0.1.0</h3>
 
-Screener that follows specified blockchain wallets and notifies when a new transaction occurs via Telegram message.
+Screener that follows specified blockchain wallets and notifies when a new transaction occurs via Telegram message. This relies entirely on <a href="https://debank.com/">DeBank</a> for data retrieval.
+<br><br>
 
-<br> 
 
-## Installation
+<h2>Installation</h2>
 
-This project uses **Python 3.9.6** and requires a
-[Chromium WebDriver](https://chromedriver.chromium.org/getting-started/) installed.
+This project uses **Python 3.10** and <a href="https://www.torproject.org/about/history/">**Tor onion router**</a>.
 
 Clone the project:
 ```
@@ -17,107 +16,84 @@ git clone https://github.com/ivandimitrovkyulev/CryptoWallets.git
 cd CryptoWallets
 ```
 
-Create a virtual environment in the current working directory and activate it:
-
+Activate virtual environment and install all third-party project dependencies
 ```
-python3 -m venv <current-directory>
+poetry shell
 
-source <current/directory>/bin/activate
-```
-
-Install all third-party project dependencies:
-```
-pip install -r requirements.txt
+poetry install
 ```
 
-You will also need to save the following variables in a **.env** file in ../CryptoWallets:
-```
-CHROME_LOCATION=<your/web/driver/path/location> 
+<br>Then install tor by following this link: https://community.torproject.org/onion-services/setup/install/
 
+
+You will also need to save the following variables in a **.env** file in **./Wallets**:
+```
 TOKEN=<telegram-token-for-your-bot>
 
 CHAT_ID_ALERTS=<id-of-telegram-chat-for-alerts>
 
-CHAT_ID_DEBUG=<id-of-telegram-chat-for-debugging>
+CHAT_ID_ALERTS_ALL=<id-of-telegram-chat-for-special-alerts>
 
-CHAT_ID_SPECIAL=<id-of-telegram-chat-for-special-alerts>
+CHAT_ID_DEBUG=<id-of-telegram-chat-for-debugging-chat>
 ```
-<br/>
+<br>
 
-## Running the script
-<br/>
 
-Create a **wallets.json** file with addresses of the following structure, where **name** is the name of the address to be screened, **chat_id** is the Telegram chat to send transactions to of this specific address:
+<h2>Running the script</h2>
+
+Create **wallets.json** file with addresses of the following structure, where **name** is the name of the address to screen for, **chat_id** is the Telegram chat to send transactions to:
 
 ```
-{
-    "0xb62530ee059c17caf3c82300b44aa9813cb0731f6": {
-        "name": "CoinBase",
-        'chat_id': ''
-    },
-    "0xg55e4b5d659a7fhb0d6eb52lp515f4833cf211gy": {
-        "name": "Binance",
-        'chat_id': ''
-    },
-    "0xju67d57519dbff34a28eef0923b259ab07985d33": {
-        "name": "Crypto.com",
-        'chat_id': ''
+{   
+    "settings": {"loop_sleep": 5, "request_sleep": 1},
+    "wallets": {
+        "0pa4fc4ec2f81a4897743c5b4f45907c02ce06s119": {
+            "name": "wallet1",
+            "chat_id": ""
+            },
+        "0xg9e025a1363373e48da72f5e4f6eb7cddf2f3101": {
+            "name": "wallet2",
+            "chat_id": ""
+            },
+        "0xda86d5t519dbfe34a25eef0923b259ab07986a52": {
+            "name": "wallet3",
+            "chat_id": ""
+            }
     }
 }
 ```
-Save the contents of the **wallets.json** file in a variable:
-```
-var="$(cat wallets.json)"
-```
-To start screening addresses in a multiprocessing mode by passing addresses to **main.py**:
-```
-python main.py -m "$var"
-```
-To start screening addresses in a subprocessing mode by passing addresses to **main.py**:
-```
-python main.py -s "$var"
-```
-**Difference between subprocessing and multiprocessing:**
-<br>
-Subprocessing runs a separate Python program for each address in the list and it is completely separated from the rest.
-Multiprocessing runs in the same script but with different processes concurently within. This means that processes are not completely isolated and if, for example, DeBank does not return any response to one address the whole script will get stucked. 
 
-<br/>
-
-## Docker deployment
-<br/>
-
-Build a docker image named **wallet-scrape**:
+First start Tor in a terminal session:
 ```
-cd CryptoWallets
-docker build . -t <image-name>
+tor
 ```
-Run docker container:
+Then start the script:
 ```
-var="$(cat wallets.json)"
-
-docker run --shm-size="2g" -it <image-id> python3 main.py <mode> "$var"  
+python3 main.py "$(cat wallets.json)"
 ```
 
-where **--shm-size="2g"** docker argument is provided to prevent Chromium from the **"from tab crashed"** error.
 
-<br>
+<br><h2>Docker deployment</h2>
 
-Or to run an individual container for a single address:
+Build a docker image named **wallets**:
 ```
-docker run --shm-size="2g" -it <image-id> python3 -m src.individual.scrape <address> <name>
-```
-
-Or run all containers in **wallets.json** individually, where each wallet gets its own container:
-```
-python3 run_containers.py wallets.json
-```
-To stop all containers at once:
-```
-docker kill $(docker ps -q)
+docker build . -t wallets
 ```
 
-<br/>
-<br/>
+Start a docker container, named **wallets**:
+```
+docker run --name="wallets" "wallets" python3 main.py "$(cat wallets.json)"
+```
 
-Email: ivandkyulev@gmail.com
+Additionally you can run **container_check.py** to monitor whether the docker container is running as expected. It sends error notifications to CHAT_ID_DEBUG if container has stopped. Also, every 12hours sends an alert to show it script itself is running and container's last execution loop.
+
+```
+# copy .env file first
+docker cp wallets:/wallets/.env . | chmod go-rw .env
+
+# then start script in the background
+nohup python3 container_check.py wallets &
+```
+
+
+<br/>Email: ivandkyulev@gmail.com
