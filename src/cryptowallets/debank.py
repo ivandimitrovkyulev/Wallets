@@ -3,14 +3,22 @@ Asynchronous transaction history scraping of https://debank.com/ for a specified
 """
 import time
 
+from typing import List
+from copy import deepcopy
+from datetime import datetime
 from requests import Response
 
 from src.cryptowallets.datatypes import Wallet
+from src.cryptowallets.compare import (
+    compare_lists,
+    alert_txns,
+)
 from src.cryptowallets.tor import (
     change_ip,
     get_tor_session,
 )
 from src.cryptowallets.common.logger import log_error
+from src.cryptowallets.common.variables import time_format
 
 
 def get_debank_resp(wallet: Wallet, txn_count: int = 20,
@@ -57,3 +65,51 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
     data = resp.json()
 
     return data['data']
+
+
+def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
+    """
+    Screens each wallet address for a new transaction and alerts via Telegram.
+
+    :param wallets_list: List of Wallet[addr, name] data types.
+    :param sleep_time: Time to sleep between loops
+    """
+
+    data = [get_last_txns(wallet) for wallet in wallets_list]
+    old_txns = [[item['history_list'], item['token_dict']] for item in data if item]
+
+    loop_counter = 1
+    while True:
+        # Wait for new transaction to appear
+        start = time.perf_counter()
+        time.sleep(sleep_time)
+
+        data = [get_last_txns(wallet) for wallet in wallets_list]
+        new_txns = [[item['history_list'], item['token_dict']] for item in data if item]
+
+        # Iterate through all wallets
+        for i, txns in enumerate(zip(new_txns, old_txns)):
+
+            new_txn, old_txn = txns  # Unpack new and old txns
+
+            new_history_list, new_token_dict = new_txn  # Unpack new history list & token dictionary
+            old_history_list, old_token_dict = old_txn  # Unpack old history list & token dictionary
+            wallet = wallets_list[i]  # Get wallet data
+
+            # If empty list returned - no point to compare
+            if len(new_history_list) == 0:
+                continue
+
+            # If new txns found - check them for spam
+            found_txns = compare_lists(new_history_list, old_history_list)
+
+            if found_txns:
+                all_token_dict = new_token_dict | old_token_dict  # Merge dictionaries
+                alert_txns(found_txns, wallet, all_token_dict)
+
+                # Save latest txn data in old_txns only if there is a new txn
+                old_txns[i] = deepcopy(new_txns[i])
+
+        timestamp = datetime.now().astimezone().strftime(time_format)
+        print(f"{timestamp} - Loop {loop_counter} executed in {(time.perf_counter() - start):,.2f} secs.")
+        loop_counter += 1

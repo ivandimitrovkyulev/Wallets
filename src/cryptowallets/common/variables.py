@@ -4,8 +4,6 @@ Set up program variables.
 import os
 from dotenv import load_dotenv
 
-from pymemcache.client.base import PooledClient
-
 
 load_dotenv()
 # Get env variables
@@ -15,8 +13,6 @@ CHAT_ID_ALERTS_ALL = os.getenv("CHAT_ID_ALERTS_ALL")
 CHAT_ID_DEBUG = os.getenv("CHAT_ID_DEBUG")
 TOR_PASSWORD = os.getenv("TOR_PASSWORD")
 
-# Set-up memcached client instance
-memcache = PooledClient(('localhost', 11211), connect_timeout=3, timeout=3)
 
 time_format = "%Y-%m-%d %H:%M:%S, %Z"
 log_format = "%(asctime)s - %(levelname)s - %(message)s"

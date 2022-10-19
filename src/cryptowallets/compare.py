@@ -18,6 +18,7 @@ from src.cryptowallets.common.logger import (
 from src.cryptowallets.common.variables import (
     chains,
     time_format,
+    CHAT_ID_ALERTS,
     CHAT_ID_ALERTS_ALL,
 )
 
@@ -143,7 +144,7 @@ def check_txn(txn: dict, tokens_dicts: Dict[str, dict]) -> bool:
             return False
 
 
-def alert_txns(txns: List[dict], wallet: Wallet, tokens_dicts: Dict[str, dict]):
+def alert_txns(txns: List[dict], wallet: Wallet, tokens_dicts: Dict[str, dict]) -> None:
     """
     Alerts for any matching transactions via Telegram message.
 
@@ -153,14 +154,12 @@ def alert_txns(txns: List[dict], wallet: Wallet, tokens_dicts: Dict[str, dict]):
     """
 
     for txn in txns:
+        txn_message = format_txn_message(txn, wallet, tokens_dicts)
 
         # Send filtered txns to Filtered Chat
         if check_txn(txn, tokens_dicts):
-            txn_message = format_txn_message(txn, wallet, tokens_dicts)
-
-            telegram_send_message(txn_message)
-            log_txns.info(txn_message)
+            telegram_send_message(txn_message, telegram_chat_id=CHAT_ID_ALERTS)
 
         # Send every txns to All Chat
-        txn_message = format_txn_message(txn, wallet, tokens_dicts)
         telegram_send_message(txn_message, telegram_chat_id=CHAT_ID_ALERTS_ALL)
+        log_txns.info(txn_message)

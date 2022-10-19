@@ -8,4 +8,4 @@ class Wallet:
     name: str
 
     def __repr__(self):
-        return f"{self.name} {self.address}"
+        return f"{self.name}, {self.address}"

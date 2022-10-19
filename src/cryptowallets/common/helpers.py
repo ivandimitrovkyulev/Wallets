@@ -1,16 +1,20 @@
+from datetime import datetime
 from tabulate import tabulate
 
-from src.cryptowallets.common.variables import CHAT_ID_ALERTS
+from src.cryptowallets.common.variables import (
+    CHAT_ID_ALERTS,
+    time_format,
+)
 
 
-def print_start_message(info: dict, timestamp: str) -> None:
+def print_start_message(info: dict) -> None:
     """
     Prints start message showing which addresses are being scraped.
 
     :param info: Info dictionary with input data.
-    :param timestamp: Timestamp of the beginning
     """
 
+    timestamp = datetime.now().astimezone().strftime(time_format)
     print(f"{timestamp} - Started screening the following wallet addresses:")
 
     message = []
