@@ -38,5 +38,5 @@ if __name__ == "__main__":
     wallets = Process(target=scrape_wallets, args=(wallets_info,loop_sleep, ))
 
     tor.start()  # Start Process 1 - Tor
-    time.sleep(10)  # Wait for Tor to initialise
+    time.sleep(15)  # Wait for Tor to initialise
     wallets.start()  # Start Process 2 - Main wallet screener

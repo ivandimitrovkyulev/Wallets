@@ -110,7 +110,7 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict])
 
     message = f"-> {time_stamp} - Txn from <a href='{wallet_link}'>{wallet.name}</a>\n" \
               f"{txn_type}, send{send_items}, receive{receive_items}\n" \
-              f"Txn hash: <a href='{txn_link}'>{wallet.address}</a>"
+              f"Txn hash: <a href='{txn_link}'>{txn_hash[0:6]}...{txn_hash[-4:]}</a>"
 
     return message
 
