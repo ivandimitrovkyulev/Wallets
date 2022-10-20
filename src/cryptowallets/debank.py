@@ -47,6 +47,15 @@ def get_debank_resp(wallet: Wallet, txn_count: int = 20,
 
 def get_last_txns(wallet: Wallet, txn_count: int = 20,
                   timeout: int = 10, max_wait_time: int = 15) -> dict | None:
+    """
+    Tries to get last txns from DeBank until max wait time reached.
+
+    :param wallet: Address to scrape transactions from
+    :param txn_count: Number of transactions to return. Max 20
+    :param timeout: Maximum time to wait for response
+    :param max_wait_time: Max time to wait for rery
+    :returns: Response dictionary
+    """
 
     resp = get_debank_resp(wallet, txn_count, timeout)
     if not resp:
@@ -76,7 +85,7 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
     """
 
     data = [get_last_txns(wallet) for wallet in wallets_list]
-    old_txns = [[item['history_list'], item['token_dict']] if item else None for item in data]
+    old_txns = [[item['history_list'], item['token_dict']] if item else [{}, {}] for item in data]
 
     loop_counter = 1
     while True:
@@ -85,16 +94,15 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
         time.sleep(sleep_time)
 
         data = [get_last_txns(wallet) for wallet in wallets_list]
-        new_txns = [[item['history_list'], item['token_dict']] if item else None for item in data]
+        new_txns = [[item['history_list'], item['token_dict']] if item else [{}, {}] for item in data]
 
         # Iterate through all wallets
         for i, txns in enumerate(zip(new_txns, old_txns)):
-
+            wallet = wallets_list[i]  # Get wallet data
             new_txn, old_txn = txns  # Unpack new and old txns
 
             new_history_list, new_token_dict = new_txn  # Unpack new history list & token dictionary
             old_history_list, old_token_dict = old_txn  # Unpack old history list & token dictionary
-            wallet = wallets_list[i]  # Get wallet data
 
             # If empty list returned - no point to compare
             if len(new_history_list) == 0:
