@@ -95,7 +95,11 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict])
         txn_type = txn['tx']['name']
     except TypeError or KeyError:
         txn_type = txn['cate_id']
-    txn_type = txn_type[0].upper() + txn_type[1:]
+
+    if txn_type and len(txn_type) > 0:
+        txn_type = txn_type[0].upper() + txn_type[1:]
+    else:
+        txn_type = ''
 
     try:
         txn_link = chains[chain] + txn_hash
@@ -154,7 +158,7 @@ def alert_txns(txns: List[dict], wallet: Wallet, tokens_dicts: Dict[str, dict]) 
     """
 
     for txn in txns:
-        if len(txn) == 0:
+        if not txn or len(txn) == 0:
             continue
 
         txn_message = format_txn_message(txn, wallet, tokens_dicts)
