@@ -30,13 +30,13 @@ if __name__ == "__main__":
     info: dict = json.loads(sys.argv[-1])
     loop_sleep, request_sleep = info["settings"].values()
 
-    print_start_message(info)
-
     wallets_info = [Wallet(address, info['wallets'][address]['name']) for address in info['wallets']]
 
     tor = Process(target=start_tor)
     wallets = Process(target=scrape_wallets, args=(wallets_info,loop_sleep, ))
 
     tor.start()  # Start Process 1 - Tor
+    print(f"Starting Tor onion router...")
     time.sleep(15)  # Wait for Tor to initialise
     wallets.start()  # Start Process 2 - Main wallet screener
+    print_start_message(info)
