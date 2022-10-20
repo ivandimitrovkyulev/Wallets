@@ -154,6 +154,9 @@ def alert_txns(txns: List[dict], wallet: Wallet, tokens_dicts: Dict[str, dict]) 
     """
 
     for txn in txns:
+        if len(txn) == 0:
+            continue
+
         txn_message = format_txn_message(txn, wallet, tokens_dicts)
 
         # Send filtered txns to Filtered Chat
