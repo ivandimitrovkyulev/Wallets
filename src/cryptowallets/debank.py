@@ -22,13 +22,14 @@ from src.cryptowallets.common.variables import time_format
 
 
 def get_debank_resp(wallet: Wallet, txn_count: int = 20,
-                    timeout: int = 10) -> Response | None:
+                    timeout: int = 10, port: int = 9050) -> Response | None:
     """
     Returns a GET response from https://api.debank.com/history/list for a wallet address.
 
     :param wallet: Address to scrape transactions from
     :param txn_count: Number of transactions to return. Max 20.
     :param timeout: Maximum time to wait for response
+    :param port: Port number
     :returns: History list transactions data
     """
     start_time = 0
@@ -37,11 +38,11 @@ def get_debank_resp(wallet: Wallet, txn_count: int = 20,
           f"?page_count={txn_count}&start_time={start_time}&token_id=&user_addr={wallet.address}"
 
     try:
-        resp = get_tor_session().get(api, timeout=timeout)
+        resp = get_tor_session(port=port).get(api, timeout=timeout)
         return resp
 
     except Exception as e:
-        log_error.warning(f"'get_debank_resp' - {Wallet} - {e}")
+        log_error.warning(f"'get_debank_resp' - {wallet} - {e}")
         return None
 
 
@@ -68,7 +69,7 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
         resp = get_debank_resp(wallet, txn_count, timeout)
 
         if time.perf_counter() - start >= max_wait_time:
-            log_error.warning(f"'get_last_txns' - Max wait time exceeded for {Wallet.name}")
+            log_error.warning(f"'get_last_txns' - Max wait time exceeded for {wallet.name}")
             break
 
     data = resp.json()

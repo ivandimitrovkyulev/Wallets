@@ -31,10 +31,10 @@ You will also need to save the following variables in a **.env** file in **./Wal
 TOKEN=<telegram-token-for-your-bot>
 
 CHAT_ID_ALERTS=<id-of-telegram-chat-for-alerts>
-
 CHAT_ID_ALERTS_ALL=<id-of-telegram-chat-for-special-alerts>
-
 CHAT_ID_DEBUG=<id-of-telegram-chat-for-debugging-chat>
+
+TOR_PASSWORD=<tor-password>
 ```
 <br>
 
@@ -63,10 +63,24 @@ Create **wallets.json** file with addresses of the following structure, where **
 }
 ```
 
-First start Tor in a terminal session:
+Configure your torrc file. On MacOS it is located in: **/usr/local/etc/tor** <br>
+Unhash the following lines:
 ```
-tor
+ControlPort 9051
+HashedControlPassword 16:4BF9B2165F77FADG60C55120EC84BA0237A810FFACF67F8A9310E570G4
+CookieAuthentication 1
 ```
+Create a password and update torrc file:
+```
+tor --hash-password <your-tor-password>
+# Should print the following format: 
+# 16:575E816B529092446013A0AB974300E16B0A5543B73271E1FB1708CCEC
+```
+Then update HashedControlPassword in your torrc file and save. <br>
+Finally, add your HashedControlPassword to TOR_PASSWORD in your directory's **.env** file.
+
+<br>
+
 Then start the script:
 ```
 python3 main.py "$(cat wallets.json)"
@@ -75,7 +89,9 @@ python3 main.py "$(cat wallets.json)"
 
 <br><h2>Docker deployment</h2>
 
-Build a docker image named **wallets**:
+Copy your torrc file in your project's directory.
+<br>
+Then build a docker image named **wallets**:
 ```
 docker build . -t wallets
 ```

@@ -1,10 +1,10 @@
 """
 torrc file located at /usr/local/etc/tor on mac.
 """
+import requests
 from stem import Signal
 from stem.control import Controller
 from fake_useragent import UserAgent
-from requests import Session, session
 
 from src.cryptowallets.common.variables import TOR_PASSWORD
 
@@ -32,7 +32,7 @@ def change_ip(password: str = "", port: int = 9051) -> float:
     return secs
 
 
-def get_tor_session(port: int = 9050) -> Session:
+def get_tor_session(port: int = 9050) -> requests.Session:
     """
     Create a new socks5h:// configured Tor session.
 
@@ -40,8 +40,11 @@ def get_tor_session(port: int = 9050) -> Session:
     :return: Session instance
     """
 
-    tor_session = session()
-    tor_session.proxies = {f'http': f'socks5h://localhost:{port}',
-                           f'https': f'socks5h://localhost:{port}'}
+    tor_session = requests.session()
+    tor_session.proxies = {
+        'http': f"socks5h://127.0.0.1:{port}",
+        'https': f"socks5h://127.0.0.1:{port}",
+    }
+    tor_session.headers = headers
 
     return tor_session
