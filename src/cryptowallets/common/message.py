@@ -73,6 +73,10 @@ def telegram_send_message(
 
             log_error.warning(f"'telegram_send_message' - Telegram message not sent, attempt {counter}. "
                               f"Sleeping for {sleep_time} secs...")
+
+            if counter >= 10:
+                return None
+
             counter += 1
             sleep(sleep_time)
 
