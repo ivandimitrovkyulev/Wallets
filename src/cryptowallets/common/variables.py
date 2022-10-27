@@ -19,12 +19,12 @@ log_format = "%(asctime)s - %(levelname)s - %(message)s"
 
 
 chains = {
-    'eth': 'https://etherscan.io/tx/',
-    'op': 'https://optimistic.etherscan.io/tx/',
-    'arb': 'https://arbiscan.io/tx/',
-    'bsc': 'https://bscscan.com/tx/',
-    'avax': 'https://snowtrace.io/tx/',
-    'matic': 'https://polygonscan.com/tx/',
-    'aurora': 'https://aurorascan.dev/tx/',
-    'cro': 'https://cronoscan.com/tx/',
+    'eth': 'https://etherscan.io',
+    'op': 'https://optimistic.etherscan.io',
+    'arb': 'https://arbiscan.io',
+    'bsc': 'https://bscscan.com',
+    'avax': 'https://snowtrace.io',
+    'matic': 'https://polygonscan.com',
+    'aurora': 'https://aurorascan.dev',
+    'cro': 'https://cronoscan.com',
 }

@@ -54,7 +54,8 @@ values = [val for val in env_text.split("\n") if val != ""]
 env_vals = {}
 for val in values:
     buff = val.split("=")
-    env_vals[f"{buff[0]}"] = buff[1]
+    if len(buff) == 2:
+        env_vals[f"{buff[0]}"] = buff[1]
 
 chat_id_alerts = env_vals['CHAT_ID_ALERTS']
 chat_id_debug = env_vals['CHAT_ID_DEBUG']
@@ -71,7 +72,7 @@ register(telegram_send_message, f"⚠️ <b>{container_name.upper()}: container_
          chat_id_debug, token)
 
 wait_time = 5 * 60  # 5 mins (5 * 60 secs) sleep time in each loop
-max_time_diff = 5 * 60  # 5 mins max difference(in secs) between current and script's last timestamp
+max_time_diff = 12 * 60  # 5 mins max difference(in secs) between current and script's last timestamp
 update_time = 12  # 12 hour check 'OK' message to Telegram to notify container_check is still running
 
 # Sleep before starting the script - 15 mins

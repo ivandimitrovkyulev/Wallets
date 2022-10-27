@@ -37,6 +37,6 @@ if __name__ == "__main__":
 
     tor.start()  # Start Process 1 - Tor
     print(f"Starting Tor onion router...")
-    time.sleep(15)  # Wait for Tor to initialise
+    time.sleep(30)  # Wait for Tor to initialise
     wallets.start()  # Start Process 2 - Main wallet screener
     print_start_message(info)

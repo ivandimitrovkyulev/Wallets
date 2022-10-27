@@ -58,9 +58,11 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict])
 
     chain = txn['chain']  # Shortened name of blockchain
     txn_hash = txn['id']  # Transaction hash
+    formatted_txn_hash = f"{txn_hash[0:6]}...{txn_hash[-4:]}"  # eg. 0xc43c...37ea
     time_at_secs = int(txn['time_at'])  # eg. 1664049342 secs
+    other_addr = txn['other_addr']  # eg. Interacted With (To):
 
-    time_stamp = datetime.fromtimestamp(time_at_secs, timezone.utc).strftime(time_format)
+    txn_stamp = datetime.fromtimestamp(time_at_secs, timezone.utc).strftime(time_format)
 
     sends_info = txn['sends']
     send_items = []
@@ -75,9 +77,10 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict])
                 token_name = tokens_dicts[token_id]['symbol']
             except KeyError:
                 token_name = ''
+
             send_items.append(f"{amount:,} {token_name}")
     else:
-        send_items.append(None)
+        send_items.append('None')
 
     if receive_info:
         for receive in receive_info:
@@ -87,9 +90,10 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict])
                 token_name = tokens_dicts[token_id]['symbol']
             except KeyError:
                 token_name = ''
+
             receive_items.append(f"{amount:,} {token_name}")
     else:
-        receive_items.append(None)
+        receive_items.append('None')
 
     try:
         txn_type = txn['tx']['name']
@@ -102,15 +106,21 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict])
         txn_type = ''
 
     try:
-        txn_link = chains[chain] + txn_hash
+        txn_link = f"{chains[chain]}/tx/{txn_hash}"
     except KeyError:
         txn_link = f"https://www.google.com/search?&rls=en&q={chain}+{txn_hash}&ie=UTF-8&oe=UTF-8"
 
     wallet_link = f"https://debank.com/profile/{wallet.address}/history"
+    interacted_with_link = f"{chains[chain]}/address/{other_addr}"
 
-    message = f"-> {time_stamp} - Txn from <a href='{wallet_link}'>{wallet.name}</a>\n" \
-              f"{txn_type}, send{send_items}, receive{receive_items}\n" \
-              f"Txn hash: <a href='{txn_link}'>{txn_hash[0:6]}...{txn_hash[-4:]}</a>"
+    timestamp = datetime.now().astimezone().strftime(time_format)
+    message = f"-> {timestamp}\n" \
+              f"New txn <a href='{txn_link}'>{formatted_txn_hash}</a> " \
+              f"from <a href='{wallet_link}'>{wallet.name}</a>\n" \
+              f"Timestamp:  {txn_stamp}\n" \
+              f"Type: <a href='{interacted_with_link}'>{txn_type}</a>\n" \
+              f"Send: {', '.join(send_items)}\n" \
+              f"Receive: {', '.join(receive_items)}\n"
 
     return message
 
@@ -131,7 +141,7 @@ def check_txn(txn: dict, tokens_dicts: Dict[str, dict]) -> bool:
             return False
 
     except TypeError or KeyError:
-        pass
+        log_error.warning(f"check_txnError - skipped txn {txn}")
 
     for receive in txn['receives']:
         # Get token ID
@@ -158,15 +168,17 @@ def alert_txns(txns: List[dict], wallet: Wallet, tokens_dicts: Dict[str, dict]) 
     """
 
     for txn in txns:
+
+        # If nothing returned - continue
         if not txn or len(txn) == 0:
             continue
 
         txn_message = format_txn_message(txn, wallet, tokens_dicts)
 
-        # Send filtered txns to Filtered Chat
-        if check_txn(txn, tokens_dicts):
-            telegram_send_message(txn_message, telegram_chat_id=CHAT_ID_ALERTS)
-
         # Send every txns to All Chat
         telegram_send_message(txn_message, telegram_chat_id=CHAT_ID_ALERTS_ALL)
         log_txns.info(txn_message)
+
+        # Send filtered txns to Filtered Chat
+        if check_txn(txn, tokens_dicts):
+            telegram_send_message(txn_message, telegram_chat_id=CHAT_ID_ALERTS)
