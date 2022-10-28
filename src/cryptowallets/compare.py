@@ -111,7 +111,10 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict])
         txn_link = f"https://www.google.com/search?&rls=en&q={chain}+{txn_hash}&ie=UTF-8&oe=UTF-8"
 
     wallet_link = f"https://debank.com/profile/{wallet.address}/history"
-    interacted_with_link = f"{chains[chain]}/address/{other_addr}"
+    try:
+        interacted_with_link = f"{chains[chain]}/address/{other_addr}"
+    except KeyError:
+        interacted_with_link = f"https://www.google.com/search?&rls=en&q={chain}+{other_addr}&ie=UTF-8&oe=UTF-8"
 
     timestamp = datetime.now().astimezone().strftime(time_format)
     message = f"-> {timestamp}\n" \

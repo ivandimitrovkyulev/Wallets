@@ -27,4 +27,5 @@ chains = {
     'matic': 'https://polygonscan.com',
     'aurora': 'https://aurorascan.dev',
     'cro': 'https://cronoscan.com',
+    'heco': 'https://www.hecoinfo.com/en-us',
 }
