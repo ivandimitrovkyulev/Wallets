@@ -9,7 +9,10 @@ from multiprocessing import Process
 from src.cryptowallets.datatypes import Wallet
 from src.cryptowallets.debank import scrape_wallets
 from src.cryptowallets.common.exceptions import exit_handler
-from src.cryptowallets.common.helpers import print_start_message
+from src.cryptowallets.common.helpers import (
+    print_start_message,
+    send_pin_message,
+)
 
 
 def start_tor():
@@ -35,8 +38,13 @@ if __name__ == "__main__":
     tor = Process(target=start_tor)
     wallets = Process(target=scrape_wallets, args=(wallets_info,loop_sleep, ))
 
-    tor.start()  # Start Process 1 - Tor
+    # Start Process 1 - Tor
+    tor.start()
     print(f"Starting Tor onion router...")
+
     time.sleep(30)  # Wait for Tor to initialise
-    wallets.start()  # Start Process 2 - Main wallet screener
+
+    # Start Process 2 - Main wallet screener
+    wallets.start()
     print_start_message(info)
+    send_pin_message(info)

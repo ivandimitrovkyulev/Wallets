@@ -58,7 +58,7 @@ def telegram_send_message(
     url = "https://api.telegram.org/bot{}/sendMessage".format(telegram_token)
 
     # Construct data for the request
-    payload = {"chat_id": telegram_chat_id, "text": message_text,
+    payload = {"chat_id": telegram_chat_id, "text": message_text, "updatePinnedMessage": True,
                "disable_web_page_preview": disable_web_page_preview, "parse_mode": "HTML"}
 
     # send the POST request
