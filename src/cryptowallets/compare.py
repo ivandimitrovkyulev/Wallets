@@ -144,7 +144,7 @@ def check_txn(txn: dict, tokens_dicts: Dict[str, dict]) -> bool:
             return False
 
     except TypeError or KeyError:
-        log_error.warning(f"check_txnError - skipped txn {txn}")
+        pass
 
     for receive in txn['receives']:
         # Get token ID

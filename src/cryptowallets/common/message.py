@@ -66,19 +66,23 @@ def telegram_send_message(
         counter = 1
         # If too many requests, wait for Telegram's rate limit
         while True:
-            post_request = requests.post(url=url, data=payload, timeout=timeout)
+            try:
+                post_request = requests.post(url=url, data=payload, timeout=timeout)
 
-            if post_request.json()['ok']:
-                return post_request
+                if post_request.json()['ok']:
+                    return post_request
 
-            log_error.warning(f"'telegram_send_message' - Telegram message not sent, attempt {counter}. "
-                              f"Sleeping for {sleep_time} secs...")
+                log_error.warning(f"'telegram_send_message' - Telegram message not sent, attempt {counter}. "
+                                  f"Sleeping for {sleep_time} secs...")
 
-            if counter >= 10:
-                return None
+                if counter >= 10:
+                    return None
 
-            counter += 1
-            sleep(sleep_time)
+                counter += 1
+                sleep(sleep_time)
+
+            except Exception as e:
+                log_error.warning(f"'telegram_send_message' - Telegram message not sent for {url} - {e}")
 
     except ConnectionError as e:
         log_error.warning(f"'telegram_send_message' - {e} - '{message_text})' was not sent.")
