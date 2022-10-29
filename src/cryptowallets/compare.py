@@ -160,6 +160,8 @@ def check_txn(txn: dict, tokens_dicts: Dict[str, dict]) -> bool:
             log_spam.info(txn)
             return False
 
+    return True
+
 
 def alert_txns(txns: List[dict], wallet: Wallet, tokens_dicts: Dict[str, dict]) -> None:
     """
