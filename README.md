@@ -79,7 +79,7 @@ Finally, add your HashedControlPassword to TOR_PASSWORD in your directory's **.e
 <br>
 
 Then start the script:
-```python
+```shell
 python3 main.py "$(cat wallets.json)"
 ```
 Telegram alert message looks ike the following:
