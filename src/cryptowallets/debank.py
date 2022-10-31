@@ -86,7 +86,8 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
     """
 
     data = [get_last_txns(wallet) for wallet in wallets_list]
-    old_txns = [[item['history_list'], item['token_dict']] if item else [{}, {}] for item in data]
+    old_txns = [[item['history_list'], item['token_dict'], item['project_dict']]
+                if item else [{}, {}, {}] for item in data]
 
     loop_counter = 1
     while True:
@@ -95,15 +96,16 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
         time.sleep(sleep_time)
 
         data = [get_last_txns(wallet) for wallet in wallets_list]
-        new_txns = [[item['history_list'], item['token_dict']] if item else [{}, {}] for item in data]
+        new_txns = [[item['history_list'], item['token_dict'], item['project_dict']]
+                    if item else [{}, {}, {}] for item in data]
 
         # Iterate through all wallets
         for i, txns in enumerate(zip(new_txns, old_txns)):
             wallet = wallets_list[i]  # Get wallet data
             new_txn, old_txn = txns  # Unpack new and old txns
 
-            new_history_list, new_token_dict = new_txn  # Unpack new history list & token dictionary
-            old_history_list, old_token_dict = old_txn  # Unpack old history list & token dictionary
+            new_history_list, new_token_dict, new_project_dict = new_txn  # Unpack new data
+            old_history_list, old_token_dict, old_project_dict = old_txn  # Unpack old data
 
             # If empty list returned - no point to compare
             if len(new_history_list) == 0:
@@ -114,7 +116,8 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
 
             if found_txns:
                 all_token_dict = new_token_dict | old_token_dict  # Merge dictionaries
-                alert_txns(found_txns, wallet, all_token_dict)
+                all_project_dict = new_project_dict | old_project_dict  # Merge dictionaries
+                alert_txns(found_txns, wallet, all_token_dict, all_project_dict)
 
                 # Save latest txn data in old_txns only if there is a new txn
                 old_txns[i] = deepcopy(new_txns[i])
