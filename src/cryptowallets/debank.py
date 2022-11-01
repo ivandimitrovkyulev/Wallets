@@ -16,6 +16,7 @@ from src.cryptowallets.compare import (
 from src.cryptowallets.tor import (
     change_ip,
     get_tor_session,
+    user_agent,
 )
 from src.cryptowallets.common.logger import log_error
 from src.cryptowallets.common.variables import time_format
@@ -38,7 +39,7 @@ def get_debank_resp(wallet: Wallet, txn_count: int = 20,
           f"?page_count={txn_count}&start_time={start_time}&token_id=&user_addr={wallet.address}"
 
     try:
-        resp = get_tor_session(port=port).get(api, timeout=timeout)
+        resp = get_tor_session(port=port).get(api, timeout=timeout, headers={"User_Agent": user_agent.random})
         return resp
 
     except Exception as e:

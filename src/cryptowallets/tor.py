@@ -9,7 +9,7 @@ from fake_useragent import UserAgent
 from src.cryptowallets.common.variables import TOR_PASSWORD
 
 
-headers = {"User_Agent": UserAgent(verify_ssl=False).random}
+user_agent = UserAgent(verify_ssl=False)
 
 
 def change_ip(password: str = "", port: int = 9051) -> float:
@@ -46,6 +46,6 @@ def get_tor_session(port: int = 9050) -> requests.Session:
         'https': f"socks5h://127.0.0.1:{port}",
     }
 
-    tor_session.headers = headers
+    tor_session.headers = {"User_Agent": user_agent.random}
 
     return tor_session
