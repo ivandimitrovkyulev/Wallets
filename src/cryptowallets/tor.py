@@ -45,6 +45,7 @@ def get_tor_session(port: int = 9050) -> requests.Session:
         'http': f"socks5h://127.0.0.1:{port}",
         'https': f"socks5h://127.0.0.1:{port}",
     }
+
     tor_session.headers = headers
 
     return tor_session

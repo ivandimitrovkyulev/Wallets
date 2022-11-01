@@ -29,5 +29,6 @@ chains = {
     'cro': 'https://cronoscan.com',
     'heco': 'https://www.hecoinfo.com/en-us',
     'doge': 'https://explorer.dogechain.dog',
-    'canto': 'https://evm.explorer.canto.io/',
+    'canto': 'https://evm.explorer.canto.io',
+    'ftm': 'https://ftmscan.com',
 }

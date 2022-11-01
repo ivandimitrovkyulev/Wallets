@@ -46,6 +46,51 @@ def compare_lists(new_list: List[dict], old_list: List[dict],
         return None
 
 
+def format_send_receive(txn: dict, keyword: str, chain: str, tokens_dict: Dict[str, dict]) -> list:
+    """
+    Formats 'sends' or 'receives' list of items for a transaction.
+
+    :param txn: Transaction dictionary
+    :param keyword: 'sends' or 'receives'
+    :param chain: Chain name, eg. eth, ftm, avax
+    :param tokens_dict: Dictionary with token info
+    """
+    txn_info = txn[keyword]
+    txn_items = []
+
+    if txn_info:
+        for send in txn_info:
+            amount = send['amount']
+            token_id = send['token_id']
+            try:
+                token_url = f"{chains[chain]}/address/{token_id}"
+            except KeyError:
+                token_url = f"https://www.google.com/search?&rls=en&q={chain}+{token_id}&ie=UTF-8&oe=UTF-8"
+
+            try:
+                token_name = tokens_dict[token_id]['symbol']
+            except KeyError:
+                if len(token_id) < 42:
+                    token_name = "+1 Unknown NFT"
+                else:
+                    token_name = "+1 Unknown Item"
+
+                txn_items.append(f"<a href='{token_url}'>{token_name}</a>")
+                continue
+
+            try:
+                token_price = tokens_dict[token_id]['price'] * amount
+                token_price = f"{token_price:,.2f}"
+            except (TypeError, KeyError):
+                token_price = 'n/a'
+
+            txn_items.append(f"<a href='{token_url}'>{amount:,.2f} {token_name}</a>(${token_price})")
+    else:
+        txn_items.append('None')
+
+    return txn_items
+
+
 def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
                        project_dict: Dict[str, dict]) -> str:
     """
@@ -68,50 +113,8 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
 
     txn_stamp = datetime.fromtimestamp(time_at_secs, timezone.utc).strftime(time_format)
 
-    receive_info = txn['receives']
-    receive_items = []
-    sends_info = txn['sends']
-    send_items = []
-
-    if sends_info:
-        for send in sends_info:
-            amount = send['amount']
-            token_id = send['token_id']
-            token_name = tokens_dict[token_id]['symbol']
-            token_url = f"{chains[chain]}/address/{token_id}"
-            try:
-                token_price = tokens_dict[token_id]['price'] * amount
-                token_price = f"{token_price:,.2f}"
-            except (TypeError, KeyError):
-                token_price = 'n/a'
-
-            send_items.append(f"<a href='{token_url}'>{amount:,.2f} {token_name}</a>(${token_price})")
-    else:
-        send_items.append('None')
-
-    if receive_info:
-        for receive in receive_info:
-            amount = receive['amount']
-            token_id = receive['token_id']
-            token_url = f"{chains[chain]}/address/{token_id}"
-
-            try:
-                token_name = tokens_dict[token_id]['symbol']
-            except KeyError:
-                if len(token_id) < 42:
-                    token_name = "+1 Unknown NFT"
-                else:
-                    token_name = "+1 Unknown Item"
-
-            try:
-                token_price = tokens_dict[token_id]['price'] * amount
-                token_price = f"{token_price:,.2f}"
-            except (TypeError, KeyError):
-                token_price = 'n/a'
-
-            receive_items.append(f"<a href='{token_url}'>{amount:,.2f} {token_name}</a>(${token_price})")
-    else:
-        receive_items.append('None')
+    receive_items: list = format_send_receive(txn, 'receives', chain, tokens_dict)
+    send_items: list = format_send_receive(txn, 'sends', chain, tokens_dict)
 
     if txn['tx']:
         if txn['tx']['name']:

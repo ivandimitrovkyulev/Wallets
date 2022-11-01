@@ -67,12 +67,13 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
     start = time.perf_counter()
     while resp.status_code == 429:
 
-        change_ip()  # Change IP using tor router
+        newnym_time = change_ip()  # Change IP using tor router
+        time.sleep(newnym_time)  # sleep before retrying new control connection
         resp = get_debank_resp(wallet, txn_count, timeout)
 
         if time.perf_counter() - start >= max_wait_time:
             log_error.warning(f"'get_last_txns' - Max wait time exceeded for {wallet.name}")
-            break
+            return None
 
     data = resp.json()
 
@@ -108,9 +109,6 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
 
             new_history_list, new_token_dict, new_project_dict = new_txn  # Unpack new data
             old_history_list, old_token_dict, old_project_dict = old_txn  # Unpack old data
-
-            print(len(new_history_list))
-            print(len(old_history_list))
 
             # If empty list returned - no point to compare
             if len(new_history_list) == 0:
