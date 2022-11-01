@@ -41,19 +41,19 @@ def compare_lists(new_list: List[dict], old_list: List[dict],
 
         return list_diff
 
-    except TypeError:
+    except (TypeError, KeyError):
         log_error.warning(f"'compare_lists' Error - unable to compare")
         return None
 
 
-def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict],
+def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
                        project_dict: Dict[str, dict]) -> str:
     """
     Formats a transaction into a message string.
 
     :param txn: Transaction dictionary
     :param wallet: Wallet txn came from
-    :param tokens_dicts: Dictionary with token info
+    :param tokens_dict: Dictionary with token info
     :param project_dict: Dictionary with project info
     :return: Formatted message string
     """
@@ -77,10 +77,10 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict],
         for send in sends_info:
             amount = send['amount']
             token_id = send['token_id']
-            token_name = tokens_dicts[token_id]['symbol']
+            token_name = tokens_dict[token_id]['symbol']
             token_url = f"{chains[chain]}/address/{token_id}"
             try:
-                token_price = tokens_dicts[token_id]['price'] * amount
+                token_price = tokens_dict[token_id]['price'] * amount
                 token_price = f"{token_price:,.2f}"
             except (TypeError, KeyError):
                 token_price = 'n/a'
@@ -93,10 +93,18 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict],
         for receive in receive_info:
             amount = receive['amount']
             token_id = receive['token_id']
-            token_name = tokens_dicts[token_id]['symbol']
             token_url = f"{chains[chain]}/address/{token_id}"
+
             try:
-                token_price = tokens_dicts[token_id]['price'] * amount
+                token_name = tokens_dict[token_id]['symbol']
+            except KeyError:
+                if len(token_id) < 42:
+                    token_name = "+1 Unknown NFT"
+                else:
+                    token_name = "+1 Unknown Item"
+
+            try:
+                token_price = tokens_dict[token_id]['price'] * amount
                 token_price = f"{token_price:,.2f}"
             except (TypeError, KeyError):
                 token_price = 'n/a'
@@ -120,7 +128,7 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict],
 
         if token_approve:
             approve_token_id = txn['token_approve']['token_id']
-            approve_token_name = tokens_dicts[approve_token_id]['optimized_symbol']
+            approve_token_name = tokens_dict[approve_token_id]['optimized_symbol']
 
             txn_type = f"{txn_type} {approve_token_name} on {project_name}"
         else:
@@ -149,12 +157,12 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dicts: Dict[str, dict],
     return message
 
 
-def check_txn(txn: dict, tokens_dicts: Dict[str, dict]) -> bool:
+def check_txn(txn: dict, tokens_dict: Dict[str, dict]) -> bool:
     """
     Checks whether a transaction is Normal or Spam.
 
     :param txn: Transaction dictionary
-    :param tokens_dicts: Dictionary with token info
+    :param tokens_dict: Dictionary with token info
     :return: True if transaction is Normal, False if Spam or Failed
     """
     try:
@@ -185,7 +193,7 @@ def check_txn(txn: dict, tokens_dicts: Dict[str, dict]) -> bool:
 
         if 'receive' in txn_type:
             # Get token ID
-            is_verified = tokens_dicts[token_id]['is_verified']
+            is_verified = tokens_dict[token_id]['is_verified']
             if not is_verified:
                 log_spam.info(nft_error_msg)
                 return False
@@ -193,14 +201,14 @@ def check_txn(txn: dict, tokens_dicts: Dict[str, dict]) -> bool:
     return True
 
 
-def alert_txns(txns: List[dict], wallet: Wallet, tokens_dicts: Dict[str, dict],
+def alert_txns(txns: List[dict], wallet: Wallet, tokens_dict: Dict[str, dict],
                project_dict: Dict[str, dict]) -> None:
     """
     Alerts for any matching transactions via Telegram message.
 
     :param txns: Transaction dictionary
     :param wallet: Wallet txn came from
-    :param tokens_dicts: Dictionary with token info
+    :param tokens_dict: Dictionary with token info
     :param project_dict: Dictionary with project info
     """
 
@@ -210,12 +218,12 @@ def alert_txns(txns: List[dict], wallet: Wallet, tokens_dicts: Dict[str, dict],
         if not txn or len(txn) == 0:
             continue
 
-        txn_message = format_txn_message(txn, wallet, tokens_dicts, project_dict)
+        txn_message = format_txn_message(txn, wallet, tokens_dict, project_dict)
 
         # Send every new txn to All Chat
         telegram_send_message(txn_message, telegram_chat_id=CHAT_ID_ALERTS_ALL)
         log_txns.info(txn_message)
 
         # Send filtered txns to Filtered Chat
-        if check_txn(txn, tokens_dicts):
+        if check_txn(txn, tokens_dict):
             telegram_send_message(txn_message, telegram_chat_id=CHAT_ID_ALERTS)

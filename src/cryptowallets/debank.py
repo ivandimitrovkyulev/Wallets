@@ -58,14 +58,16 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
     :returns: Response dictionary
     """
 
+    # Try to get a response and if unsuccessful return
     resp = get_debank_resp(wallet, txn_count, timeout)
-    if not resp:
+    if resp is None:
         return None
 
+    # If request is rate limited enter loop
     start = time.perf_counter()
     while resp.status_code == 429:
 
-        change_ip()
+        change_ip()  # Change IP using tor router
         resp = get_debank_resp(wallet, txn_count, timeout)
 
         if time.perf_counter() - start >= max_wait_time:
@@ -86,8 +88,8 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
     """
 
     data = [get_last_txns(wallet) for wallet in wallets_list]
-    old_txns = [[item['history_list'], item['token_dict'], item['project_dict']]
-                if item else [{}, {}, {}] for item in data]
+    old_txns = [[tx['history_list'], tx['token_dict'], tx['project_dict']]
+                if tx else [{}, {}, {}] for tx in data]
 
     loop_counter = 1
     while True:
@@ -96,8 +98,8 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
         time.sleep(sleep_time)
 
         data = [get_last_txns(wallet) for wallet in wallets_list]
-        new_txns = [[item['history_list'], item['token_dict'], item['project_dict']]
-                    if item else [{}, {}, {}] for item in data]
+        new_txns = [[tx['history_list'], tx['token_dict'], tx['project_dict']]
+                    if tx else [{}, {}, {}] for tx in data]
 
         # Iterate through all wallets
         for i, txns in enumerate(zip(new_txns, old_txns)):
@@ -106,6 +108,9 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
 
             new_history_list, new_token_dict, new_project_dict = new_txn  # Unpack new data
             old_history_list, old_token_dict, old_project_dict = old_txn  # Unpack old data
+
+            print(len(new_history_list))
+            print(len(old_history_list))
 
             # If empty list returned - no point to compare
             if len(new_history_list) == 0:

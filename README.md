@@ -82,7 +82,7 @@ Then start the script:
 ```shell
 python3 main.py "$(cat wallets.json)"
 ```
-Telegram alert message looks ike the following:
+Telegram alert message looks like the following:
 ```text
 -> 2022-10-31 01:54:59, GMT
 0xc58a...cdb0 on Eth from ivan123
