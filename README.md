@@ -1,10 +1,14 @@
-<h1>CryptoWallets</h1>
-<h3>version 0.1.0</h3>
+CryptoWallets
+===============
+### version 0.1.0
 
-Screener that follows specified blockchain wallets and notifies when a new transaction occurs via Telegram message. This relies entirely on <a href="https://debank.com/">DeBank</a> for data retrieval.
-<br><br>
+-----------------------------------------------------------------------------------------------------
 
-<h2>Installation</h2>
+Screener that follows specified blockchain wallets and notifies when a new transaction occurs via Telegram message.
+<br>This relies entirely on <a href="https://debank.com/">DeBank</a> for data all retrieval.
+<br>
+
+### Installation
 
 This project uses **Python 3.10** and <a href="https://www.torproject.org/about/history/">**Tor onion router**</a>.
 
@@ -36,7 +40,7 @@ CHAT_ID_DEBUG=<id-of-telegram-chat-for-debugging-chat>
 TOR_PASSWORD=<tor-password>
 ```
 
-<h2>Running the script</h2>
+### Running the script
 
 Create **wallets.json** file with addresses of the following structure, where **name** is the name of the address to screen for, **chat_id** is the Telegram chat to send transactions to:
 
@@ -85,14 +89,14 @@ python3 main.py "$(cat wallets.json)"
 Telegram alert message looks like the following:
 ```text
 -> 2022-10-31 01:54:59, GMT
-0xc58a...cdb0 on Eth from ivan123
+0xf28a...cdb0 on Eth from Wallet1
 Stamp:  2022-10-31 01:19:59, UTC
-Type: Unoswap, 1inch
+Type: Uniswap, 1inch
 Send: 2,500.00 USDT($2,500.00)
 Receive: 109,330.67 WCI($2,434.80)
 ```
 
-<h2>Docker deployment</h2>
+### Docker deployment
 
 Copy your torrc file in your project's directory.
 <br>
@@ -116,5 +120,5 @@ docker cp wallets:/wallets/.env . | chmod go-rw .env
 nohup python3 container_check.py wallets &
 ```
 
-
-<br/>Email: ivandkyulev@gmail.com
+<br/>
+Email: <a href="mailto:ivandkyulev@gmail.com">ivandkyulev@gmail.com</a>
