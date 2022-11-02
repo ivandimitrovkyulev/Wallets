@@ -106,7 +106,15 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
     :param sleep_time: Time to sleep between loops
     """
 
-    data = [get_last_txns(wallet) for wallet in wallets_list]
+    # Make sure all txns are fetched in the beginning to prevent Telegram msg glut
+    data = []
+    for wallet in wallets_list:
+        while True:
+            last_txns = get_last_txns(wallet)
+            if last_txns:
+                data.append(last_txns)
+                break
+
     old_txns = [[tx['history_list'], tx['token_dict'], tx['project_dict']]
                 if tx else [{}, {}, {}] for tx in data]
 

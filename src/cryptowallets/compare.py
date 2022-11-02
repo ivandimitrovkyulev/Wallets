@@ -1,6 +1,7 @@
 from typing import (
     Dict,
     List,
+    Tuple,
 )
 from datetime import (
     datetime,
@@ -92,7 +93,7 @@ def format_send_receive(txn: dict, keyword: str, chain: str, tokens_dict: Dict[s
 
 
 def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
-                       project_dict: Dict[str, dict]) -> str:
+                       project_dict: Dict[str, dict]) -> Tuple[str, str]:
     """
     Formats a transaction into a message string.
 
@@ -157,7 +158,9 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
               f"Send: {', '.join(send_items)}\n" \
               f"Receive: {', '.join(receive_items)}\n"
 
-    return message
+    log_msg = f"{wallet.address}, {wallet.name} - {txn_stamp}, {formatted_txn_hash}"
+
+    return message, log_msg
 
 
 def check_txn(txn: dict, tokens_dict: Dict[str, dict]) -> bool:
@@ -221,12 +224,12 @@ def alert_txns(txns: List[dict], wallet: Wallet, tokens_dict: Dict[str, dict],
         if not txn or len(txn) == 0:
             continue
 
-        txn_message = format_txn_message(txn, wallet, tokens_dict, project_dict)
+        telegram_msg, log_msg = format_txn_message(txn, wallet, tokens_dict, project_dict)
 
         # Send every new txn to All Chat
-        telegram_send_message(txn_message, telegram_chat_id=CHAT_ID_ALERTS_ALL)
-        log_txns.info(txn_message)
+        telegram_send_message(telegram_msg, telegram_chat_id=CHAT_ID_ALERTS_ALL)
+        log_txns.info(log_msg)
 
         # Send filtered txns to Filtered Chat
         if check_txn(txn, tokens_dict):
-            telegram_send_message(txn_message, telegram_chat_id=CHAT_ID_ALERTS)
+            telegram_send_message(telegram_msg, telegram_chat_id=CHAT_ID_ALERTS)
