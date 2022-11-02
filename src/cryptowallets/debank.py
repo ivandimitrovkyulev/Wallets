@@ -81,6 +81,8 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
             sleep(last_newnym - perf_counter())  # sleep before retrying new control connection
 
         resp = get_debank_resp(wallet, txn_count, timeout)
+        if resp is None:
+            return None
 
         if perf_counter() - start >= max_wait_time:
             log_error.warning(f"'get_last_txns' - Max wait time exceeded for {wallet.name}")

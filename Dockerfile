@@ -23,6 +23,9 @@ RUN wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512
 RUN apt-get update
 RUN apt-get install -y tor deb.torproject.org-keyring
 
+# Install nohup
+RUN apt-get install nohup
+
 # System dependencies 
 RUN pip install "poetry==$POETRY_VERSION"
 
