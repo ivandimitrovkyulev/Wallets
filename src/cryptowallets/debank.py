@@ -1,12 +1,14 @@
 """
 Asynchronous transaction history scraping of https://debank.com/ for a specified wallet address.
 """
-import time
-
 from typing import List
 from copy import deepcopy
 from datetime import datetime
 from requests import Response
+from time import (
+    perf_counter,
+    sleep,
+)
 
 from src.cryptowallets.datatypes import Wallet
 from src.cryptowallets.compare import (
@@ -20,6 +22,9 @@ from src.cryptowallets.tor import (
 )
 from src.cryptowallets.common.logger import log_error
 from src.cryptowallets.common.variables import time_format
+
+
+last_newnym = perf_counter()
 
 
 def get_debank_resp(wallet: Wallet, txn_count: int = 20,
@@ -58,6 +63,7 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
     :param max_wait_time: Max time to wait for rery
     :returns: Response dictionary
     """
+    global last_newnym
 
     # Try to get a response and if unsuccessful return
     resp = get_debank_resp(wallet, txn_count, timeout)
@@ -65,14 +71,18 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
         return None
 
     # If request is rate limited enter loop
-    start = time.perf_counter()
+    start = perf_counter()
     while resp.status_code == 429:
 
-        newnym_time = change_ip()  # Change IP using tor router
-        time.sleep(newnym_time)  # sleep before retrying new control connection
+        if perf_counter() >= last_newnym:
+            secs = change_ip()  # Change IP using tor router
+            last_newnym = perf_counter() + secs
+        else:
+            sleep(last_newnym - perf_counter())  # sleep before retrying new control connection
+
         resp = get_debank_resp(wallet, txn_count, timeout)
 
-        if time.perf_counter() - start >= max_wait_time:
+        if perf_counter() - start >= max_wait_time:
             log_error.warning(f"'get_last_txns' - Max wait time exceeded for {wallet.name}")
             return None
 
@@ -96,8 +106,8 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
     loop_counter = 1
     while True:
         # Wait for new transaction to appear
-        start = time.perf_counter()
-        time.sleep(sleep_time)
+        start = perf_counter()
+        sleep(sleep_time)
 
         data = [get_last_txns(wallet) for wallet in wallets_list]
         new_txns = [[tx['history_list'], tx['token_dict'], tx['project_dict']]
@@ -127,5 +137,5 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
                 old_txns[i] = deepcopy(new_txns[i])
 
         timestamp = datetime.now().astimezone().strftime(time_format)
-        print(f"{timestamp} - Loop {loop_counter} executed in {(time.perf_counter() - start):,.2f} secs.")
+        print(f"{timestamp} - Loop {loop_counter} executed in {(perf_counter() - start):,.2f} secs.")
         loop_counter += 1

@@ -17,7 +17,7 @@ from src.cryptowallets.common.helpers import (
 
 def start_tor():
     """Starts a Tor client"""
-    os.system("tor")
+    os.system("nohup tor &")
 
 
 if __name__ == "__main__":
