@@ -88,9 +88,14 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
             log_error.warning(f"'get_last_txns' - Max wait time exceeded for {wallet.name}")
             return None
 
-    data = resp.json()
+    try:
+        data = resp.json()
 
-    return data['data']
+        return data['data']
+
+    except Exception as e:
+        log_error.warning(f"'get_last_txns' - JSON Error for {wallet.name} - {e}")
+        return None
 
 
 def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
