@@ -56,6 +56,12 @@ def format_send_receive(txn: dict, keyword: str, chain: str, tokens_dict: Dict[s
     :param chain: Chain name, eg. eth, ftm, avax
     :param tokens_dict: Dictionary with token info
     """
+    keyword = keyword.lower()
+    if keyword == 'sends':
+        sign = '-'
+    elif keyword == 'receives':
+        sign = '+'
+
     txn_info = txn[keyword]
     txn_items = []
 
@@ -85,7 +91,7 @@ def format_send_receive(txn: dict, keyword: str, chain: str, tokens_dict: Dict[s
             except (TypeError, KeyError):
                 token_price = 'n/a'
 
-            txn_items.append(f"<a href='{token_url}'>{amount:,.2f} {token_name}</a>(${token_price})")
+            txn_items.append(f"<a href='{token_url}'>{sign}{amount:,.2f} {token_name}</a>(${token_price})")
     else:
         txn_items.append('None')
 
