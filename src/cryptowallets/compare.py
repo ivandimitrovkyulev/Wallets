@@ -57,10 +57,13 @@ def format_send_receive(txn: dict, keyword: str, chain: str, tokens_dict: Dict[s
     :param tokens_dict: Dictionary with token info
     """
     keyword = keyword.lower()
+
     if keyword == 'sends':
         sign = '-'
     elif keyword == 'receives':
         sign = '+'
+    else:
+        raise Exception(f"Keyword must be 'sends' or 'receives' string.")
 
     txn_info = txn[keyword]
     txn_items = []
@@ -169,24 +172,25 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
     return message, log_msg
 
 
-def check_txn(txn: dict, tokens_dict: Dict[str, dict]) -> bool:
+def check_txn(txn: dict, tokens_dict: Dict[str, dict], txn_message: str) -> bool:
     """
     Checks whether a transaction is Normal or Spam.
 
     :param txn: Transaction dictionary
     :param tokens_dict: Dictionary with token info
+    :param txn_message: Log message string to save txn
     :return: True if transaction is Normal, False if Spam or Failed
     """
     try:
         status = txn['tx']['status']  # Check transaction status - 0 for Failed
         if int(status) == 0:
-            log_fail.info(f"check_txn - Txn failed - {txn}")
+            log_fail.info(f"check_txn - Txn failed - {txn_message}")
             return False
     except (TypeError, KeyError):
         pass
 
     if len(txn['receives']) == 0 and len(txn['sends']) == 0:
-        log_spam.info(f"check_txn - Txn likely an approval - {txn}")
+        log_spam.info(f"check_txn - Txn likely an approval - {txn_message}")
         return False
 
     try:
@@ -196,7 +200,7 @@ def check_txn(txn: dict, tokens_dict: Dict[str, dict]) -> bool:
 
     for receive in txn['receives']:
         token_id = receive['token_id']
-        nft_error_msg = f"check_txn - Txn likely an NFT - {txn}"
+        nft_error_msg = f"check_txn - Txn likely an NFT - {txn_message}"
 
         # If token_id len is less than 42 -> likely a spam NFT
         if len(token_id) < 42:
