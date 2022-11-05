@@ -241,5 +241,5 @@ def alert_txns(txns: List[dict], wallet: Wallet, tokens_dict: Dict[str, dict],
         log_txns.info(log_msg)
 
         # Send filtered txns to Filtered Chat
-        if check_txn(txn, tokens_dict):
+        if check_txn(txn, tokens_dict, log_msg):
             telegram_send_message(telegram_msg, telegram_chat_id=CHAT_ID_ALERTS)
