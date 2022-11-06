@@ -16,6 +16,7 @@ fake-useragent = "^0.1.11"
 aiohttp-socks = "^0.7.1"
 pymemcache = "^3.5.2"
 beautifulsoup4 = "^4.11.1"
+pandas = "^1.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
