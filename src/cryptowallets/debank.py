@@ -47,13 +47,13 @@ def get_debank_resp(wallet: Wallet, txn_count: int = 20,
         resp = get_tor_session(port=port).get(api, timeout=timeout, headers={"User_Agent": user_agent.random})
         return resp
 
-    except Exception as e:
-        log_error.warning(f"'get_debank_resp' - {wallet} - {e}")
+    except Exception:
+        log_error.warning(f"'get_debank_resp' - {wallet} - Likely TimedOut.")
         return None
 
 
 def get_last_txns(wallet: Wallet, txn_count: int = 20,
-                  timeout: int = 10, max_wait_time: int = 15) -> dict | None:
+                  timeout: int = 8, max_wait_time: int = 15) -> dict | None:
     """
     Tries to get last txns from DeBank until max wait time reached.
 
