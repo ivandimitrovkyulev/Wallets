@@ -31,4 +31,5 @@ chains = {
     'doge': 'https://explorer.dogechain.dog',
     'canto': 'https://evm.explorer.canto.io',
     'ftm': 'https://ftmscan.com',
+    'metis': 'https://andromeda-explorer.metis.io',
 }

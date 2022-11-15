@@ -116,7 +116,7 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
                 break
 
     old_txns = [[tx['history_list'], tx['token_dict'], tx['project_dict']]
-                if tx else [{}, {}, {}] for tx in data]
+                if tx else [[], {}, {}] for tx in data]
 
     loop_counter = 1
     while True:
@@ -126,7 +126,7 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
 
         data = [get_last_txns(wallet) for wallet in wallets_list]
         new_txns = [[tx['history_list'], tx['token_dict'], tx['project_dict']]
-                    if tx else [{}, {}, {}] for tx in data]
+                    if tx else [[], {}, {}] for tx in data]
 
         # Iterate through all wallets
         for i, txns in enumerate(zip(new_txns, old_txns)):
@@ -149,7 +149,12 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
                 alert_txns(found_txns, wallet, all_token_dict, all_project_dict)
 
                 # Save latest txn data in old_txns only if there is a new txn
-                old_txns[i] = deepcopy(new_txns[i])
+                old_txns[i][0].extend(found_txns)  # Extend txn list
+                if len(old_txns[i][0]) > 40:  # Keep list size to 40
+                    old_txns[i][0] = old_txns[i][0][len(found_txns):]
+
+                old_txns[i][1] = deepcopy(new_txns[i][1])  # Update old token_dict
+                old_txns[i][2] = deepcopy(new_txns[i][2])  # Update old project_dict
 
         timestamp = datetime.now().astimezone().strftime(time_format)
         print(f"{timestamp} - Loop {loop_counter} executed in {(perf_counter() - start):,.2f} secs.")
