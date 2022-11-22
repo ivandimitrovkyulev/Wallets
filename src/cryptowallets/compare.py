@@ -110,7 +110,7 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
     :param wallet: Wallet txn came from
     :param tokens_dict: Dictionary with token info
     :param project_dict: Dictionary with project info
-    :return: Formatted message string
+    :return: Formatted telegram_msg & log_msg
     """
 
     chain = str(txn['chain'])  # Shortened name of blockchain
@@ -167,7 +167,7 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
               f"Send: {', '.join(send_items)}\n" \
               f"Receive: {', '.join(receive_items)}\n"
 
-    log_msg = f"{wallet.address}, {wallet.name} - {txn_stamp}, {formatted_txn_hash}"
+    log_msg = f"{wallet.address}, {wallet.name} - {txn_stamp}, {txn_link}"
 
     return message, log_msg
 
@@ -202,15 +202,16 @@ def check_txn(txn: dict, tokens_dict: Dict[str, dict], txn_message: str) -> bool
         token_id = receive['token_id']
         nft_error_msg = f"check_txn - Txn likely an NFT - {txn_message}"
 
-        # If token_id len is less than 42 -> likely a spam NFT
-        if len(token_id) < 42:
-            log_spam.info(nft_error_msg)
-            return False
-
         if 'receive' in txn_type:
-            # Get token ID
-            is_verified = tokens_dict[token_id]['is_verified']
-            if not is_verified:
+            # Check if token ID is verified
+            try:
+                is_verified = tokens_dict[token_id]['is_verified']
+                if not is_verified:
+                    log_spam.info(nft_error_msg)
+                    return False
+
+            except KeyError:
+                # If token_id not amongst token_dict then probably Spam
                 log_spam.info(nft_error_msg)
                 return False
 
