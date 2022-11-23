@@ -98,7 +98,8 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
         return None
 
 
-def scrape_wallets(wallets_list: List[Wallet], sleep_time: int, whale_txn_limit: float) -> None:
+def scrape_wallets(wallets_list: List[Wallet], sleep_time: int,
+                   whale_txn_limit: float = 100000.0) -> None:
     """
     Screens each wallet address for a new transaction and alerts via Telegram.
 
@@ -147,7 +148,7 @@ def scrape_wallets(wallets_list: List[Wallet], sleep_time: int, whale_txn_limit:
             if found_txns:
                 all_token_dict = new_token_dict | old_token_dict  # Merge dictionaries
                 all_project_dict = new_project_dict | old_project_dict  # Merge dictionaries
-                alert_txns(found_txns, wallet, all_token_dict, all_project_dict)
+                alert_txns(found_txns, wallet, all_token_dict, all_project_dict, whale_txn_limit)
 
                 # Save latest txn data in old_txns only if there is a new txn
                 old_txns[i][0].extend(found_txns)  # Extend txn list

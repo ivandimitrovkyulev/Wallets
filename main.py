@@ -40,7 +40,7 @@ if __name__ == "__main__":
     out_file = "tor_output.txt"
 
     tor = Process(target=start_tor, args=(out_file, ))
-    wallets = Process(target=scrape_wallets, args=(wallets_info, loop_sleep, ))
+    wallets = Process(target=scrape_wallets, args=(wallets_info, loop_sleep, whale_txn_limit, ))
 
     # Start Process 1 - Tor
     tor.start()
