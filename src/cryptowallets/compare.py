@@ -47,7 +47,8 @@ def compare_lists(new_list: List[dict], old_list: List[dict],
         return None
 
 
-def format_send_receive(txn: dict, keyword: str, chain: str, tokens_dict: Dict[str, dict]) -> list:
+def format_send_receive(txn: dict, keyword: str, chain: str, tokens_dict: Dict[str, dict],
+                        whale_txn_limit: float = 100000.0) -> list:
     """
     Formats 'sends' or 'receives' list of items for a transaction.
 
@@ -55,6 +56,7 @@ def format_send_receive(txn: dict, keyword: str, chain: str, tokens_dict: Dict[s
     :param keyword: 'sends' or 'receives'
     :param chain: Chain name, eg. eth, ftm, avax
     :param tokens_dict: Dictionary with token info
+    :param whale_txn_limit: Mark txns that are above some USD amount
     """
     keyword = keyword.lower()
 
@@ -90,19 +92,27 @@ def format_send_receive(txn: dict, keyword: str, chain: str, tokens_dict: Dict[s
 
             try:
                 token_price = tokens_dict[token_id]['price'] * amount
+                if token_price >= whale_txn_limit:
+                    whale_mark = '🐳'
+                else:
+                    whale_mark = ''
+
                 token_price = f"{token_price:,.2f}"
+
             except (TypeError, KeyError):
                 token_price = 'n/a'
+                whale_mark = ''
 
-            txn_items.append(f"<a href='{token_url}'>{sign}{amount:,.2f} {token_name}</a>(${token_price})")
+            txn_items.append(f"{whale_mark}<a href='{token_url}'>{sign}{amount:,.2f} {token_name}</a>(${token_price})")
+
     else:
         txn_items.append('None')
 
     return txn_items
 
 
-def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
-                       project_dict: Dict[str, dict]) -> Tuple[str, str]:
+def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict], project_dict: Dict[str, dict],
+                       whale_txn_limit: float = 100000.0) -> Tuple[str, str]:
     """
     Formats a transaction into a message string.
 
@@ -110,6 +120,7 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
     :param wallet: Wallet txn came from
     :param tokens_dict: Dictionary with token info
     :param project_dict: Dictionary with project info
+    :param whale_txn_limit: Mark txns that are above some USD amount
     :return: Formatted telegram_msg & log_msg
     """
 
@@ -123,8 +134,8 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
 
     txn_stamp = datetime.fromtimestamp(time_at_secs, timezone.utc).strftime(time_format)
 
-    receive_items: list = format_send_receive(txn, 'receives', chain, tokens_dict)
-    send_items: list = format_send_receive(txn, 'sends', chain, tokens_dict)
+    receive_items: list = format_send_receive(txn, 'receives', chain, tokens_dict, whale_txn_limit)
+    send_items: list = format_send_receive(txn, 'sends', chain, tokens_dict, whale_txn_limit)
 
     if txn['tx']:
         if txn['tx']['name']:
@@ -159,7 +170,7 @@ def format_txn_message(txn: dict, wallet: Wallet, tokens_dict: Dict[str, dict],
         interacted_with_link = f"https://www.google.com/search?&rls=en&q={chain}+{other_addr}&ie=UTF-8&oe=UTF-8"
 
     timestamp = datetime.now().astimezone().strftime(time_format)
-    message = f"-> {timestamp}\n" \
+    message = f"--> {timestamp}\n" \
               f"<a href='{txn_link}'>{formatted_txn_hash} on {chain.title()}</a> " \
               f"from <a href='{wallet_link}'>{wallet.name}</a>\n" \
               f"Stamp:  {txn_stamp}\n" \
@@ -219,7 +230,7 @@ def check_txn(txn: dict, tokens_dict: Dict[str, dict], txn_message: str) -> bool
 
 
 def alert_txns(txns: List[dict], wallet: Wallet, tokens_dict: Dict[str, dict],
-               project_dict: Dict[str, dict]) -> None:
+               project_dict: Dict[str, dict], whale_txn_limit: float = 100000.0) -> None:
     """
     Alerts for any matching transactions via Telegram message.
 
@@ -227,6 +238,7 @@ def alert_txns(txns: List[dict], wallet: Wallet, tokens_dict: Dict[str, dict],
     :param wallet: Wallet txn came from
     :param tokens_dict: Dictionary with token info
     :param project_dict: Dictionary with project info
+    :param whale_txn_limit: Mark txns that are above some USD amount
     """
 
     for txn in txns:
@@ -235,7 +247,7 @@ def alert_txns(txns: List[dict], wallet: Wallet, tokens_dict: Dict[str, dict],
         if not txn or len(txn) == 0:
             continue
 
-        telegram_msg, log_msg = format_txn_message(txn, wallet, tokens_dict, project_dict)
+        telegram_msg, log_msg = format_txn_message(txn, wallet, tokens_dict, project_dict, whale_txn_limit)
 
         # Send every new txn to All Chat
         telegram_send_message(telegram_msg, telegram_chat_id=CHAT_ID_ALERTS_ALL)

@@ -98,11 +98,12 @@ def get_last_txns(wallet: Wallet, txn_count: int = 20,
         return None
 
 
-def scrape_wallets(wallets_list: List[Wallet], sleep_time: int) -> None:
+def scrape_wallets(wallets_list: List[Wallet], sleep_time: int, whale_txn_limit: float) -> None:
     """
     Screens each wallet address for a new transaction and alerts via Telegram.
 
     :param wallets_list: List of Wallet[addr, name] data types.
+    :param whale_txn_limit: Mark txns that are above some USD amount
     :param sleep_time: Time to sleep between loops
     """
 

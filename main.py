@@ -34,13 +34,13 @@ if __name__ == "__main__":
 
     # Fetch variables
     info: dict = json.loads(sys.argv[-1])
-    loop_sleep, request_sleep = info["settings"].values()
+    loop_sleep, whale_txn_limit = info["settings"].values()
 
     wallets_info = [Wallet(address, info['wallets'][address]['name']) for address in info['wallets']]
     out_file = "tor_output.txt"
 
     tor = Process(target=start_tor, args=(out_file, ))
-    wallets = Process(target=scrape_wallets, args=(wallets_info,loop_sleep, ))
+    wallets = Process(target=scrape_wallets, args=(wallets_info, loop_sleep, ))
 
     # Start Process 1 - Tor
     tor.start()

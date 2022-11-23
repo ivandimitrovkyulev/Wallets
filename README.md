@@ -46,7 +46,7 @@ Create **wallets.json** file with addresses of the following structure, where **
 
 ```json
 {   
-    "settings": {"loop_sleep": 5, "request_sleep": 1},
+    "settings": {"loop_sleep": 5, "whale_txn_limit":  100000},
     "wallets": {
         "0pa4fc4ec2f81a4897743c5b4f45907c02ce06s119": {
             "name": "wallet1",
