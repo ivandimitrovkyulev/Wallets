@@ -226,6 +226,22 @@ def check_txn(txn: dict, tokens_dict: Dict[str, dict], txn_message: str) -> bool
                 log_spam.info(nft_error_msg)
                 return False
 
+    for send in txn['sends']:
+        token_id = send['token_id']
+        nft_error_msg = f"check_txn - Txn likely an NFT - {txn_message}"
+
+        # Check if token ID is verified
+        try:
+            is_verified = tokens_dict[token_id]['is_verified']
+            if not is_verified:
+                log_spam.info(nft_error_msg)
+                return False
+
+        except KeyError:
+            # If token_id not amongst token_dict then probably Spam
+            log_spam.info(nft_error_msg)
+            return False
+
     return True
 
 
