@@ -10,7 +10,7 @@ Screener that follows specified blockchain wallets and notifies when a new trans
 
 ### Installation
 
-This project uses **Python 3.10** and <a href="https://www.torproject.org/about/history/">**Tor onion router**</a>.
+This project uses **Python 3.10**, **Poetry 1.3.2** and <a href="https://www.torproject.org/about/history/">**Tor onion router**</a>.
 
 Clone the project:
 ```shell
